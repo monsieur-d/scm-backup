@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace ScmBackup
 {
@@ -8,6 +8,14 @@ namespace ScmBackup
     internal class Config
     {
         public string LocalFolder { get; set; }
+
+        public string BackupTargetFolder { get; set; }
+
+        public int NumberOfBackupsToRetain { get; set; }
+
+        public int NumberOfLongTermBackupsToRetain { get; set; }
+
+        public string MaxTotalBackupsSize { get; set; }
 
         /// <summary>
         /// is this a long term backup => do not check if repo has changed, backup anyway + mark backup as lt backup
