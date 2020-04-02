@@ -4,6 +4,7 @@ bin
 obj
 project.lock.json
 .vs
+launchSettings.json
 release/
 environment-variables.ps1
 src/ScmBackup/AssemblyCopyright.cs
