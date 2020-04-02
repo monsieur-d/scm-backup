@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace ScmBackup
@@ -7,6 +7,12 @@ namespace ScmBackup
     {
         BasicAuth,
         OAuth
+    }
+
+    internal enum ScmAuthenticationType
+    {
+        Https,
+        Ssh
     }
 
     /// <summary>
@@ -58,6 +64,7 @@ namespace ScmBackup
         /// </summary>
         public string OAuthConsumerSecret { get; set; }
 
+        public ScmAuthenticationType? ScmAuthenticationType { get; set; }
 
         /// <summary>
         /// list of repository names which should be ignored

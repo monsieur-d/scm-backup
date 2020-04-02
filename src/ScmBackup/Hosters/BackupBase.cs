@@ -24,7 +24,7 @@ namespace ScmBackup.Hosters
             }
 
             ScmCredentials credentials = null;
-            if (repo.IsPrivate)
+            if (repo.IsPrivate && source.ScmAuthenticationType == ScmAuthenticationType.Https)
             {
                 credentials = new ScmCredentials(source.AuthName, source.Password);
             }

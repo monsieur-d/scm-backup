@@ -1,4 +1,4 @@
-﻿using Octokit;
+using Octokit;
 using ScmBackup.Scm;
 using System;
 using System.Collections.Generic;
@@ -105,7 +105,9 @@ namespace ScmBackup.Hosters.Github
 
                 foreach (var apiRepo in userRepos)
                 {
-                    var repo = new HosterRepository(apiRepo.FullName, apiRepo.Name, apiRepo.CloneUrl, ScmType.Git);
+                    var repo = new HosterRepository(apiRepo.FullName, apiRepo.Name, 
+                        source.ScmAuthenticationType == ScmAuthenticationType.Ssh ? apiRepo.SshUrl : apiRepo.CloneUrl, 
+                        ScmType.Git);
 
                     repo.SetPrivate(apiRepo.Private);
 

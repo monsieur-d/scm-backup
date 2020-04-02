@@ -1,4 +1,4 @@
-namespace ScmBackup.Hosters
+﻿namespace ScmBackup.Hosters
 {
     /// <summary>
     /// base class for all config source validators
@@ -53,26 +53,27 @@ namespace ScmBackup.Hosters
                 }
 
             }
-            if (source.ApiAuthenticationType == ApiAuthenticationTypeEnum.BasicAuth)
+            if (source.ApiAuthenticationType == ApiAuthenticationTypeEnum.BasicAuth 
+                || source.ScmAuthenticationType == ScmAuthenticationType.Https)
             {
                 var authNameEmpty = string.IsNullOrWhiteSpace(source.AuthName);
                 var passwordEmpty = string.IsNullOrWhiteSpace(source.Password);
 
                 if (authNameEmpty ^ passwordEmpty)
-            {
+                {
                     result.AddMessage(ErrorLevel.Error, Resource.AuthNameOrPasswortEmpty,
                         ValidationMessageType.AuthNameOrPasswortEmpty);
-            }
+                }
                 else if (authNameEmpty)
-            {
+                {
                     result.AddMessage(ErrorLevel.Warn, Resource.AuthNameAndPasswortEmpty,
                         ValidationMessageType.AuthNameAndPasswortEmpty);
-            }
+                }
 
-            if (this.AuthNameAndNameMustBeEqual)
-            {
-                if (source.Type != "org" && source.Name != source.AuthName)
+                if (this.AuthNameAndNameMustBeEqual)
                 {
+                    if (source.Type != "org" && source.Name != source.AuthName)
+                    {
                         result.AddMessage(ErrorLevel.Warn,
                             string.Format(Resource.AuthNameAndNameNotEqual, source.Hoster),
                             ValidationMessageType.AuthNameAndNameNotEqual);

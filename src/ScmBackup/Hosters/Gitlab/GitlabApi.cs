@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 using ScmBackup.Http;
 using ScmBackup.Scm;
 using System;
@@ -57,7 +57,7 @@ namespace ScmBackup.Hosters.Gitlab
 
                     foreach (var apiRepo in response)
                     {
-                        string cloneUrl = apiRepo.http_url_to_repo;
+                        string cloneUrl = config.ScmAuthenticationType == ScmAuthenticationType.Ssh ? apiRepo.ssh_url_to_repo : apiRepo.http_url_to_repo;
 
                         var repo = new HosterRepository(apiRepo.path_with_namespace, apiRepo.name, cloneUrl, ScmType.Git);
 

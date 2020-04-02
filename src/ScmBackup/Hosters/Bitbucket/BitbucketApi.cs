@@ -64,7 +64,7 @@ namespace ScmBackup.Hosters.Bitbucket
 
                 var scmAuthenticationType = source.ScmAuthenticationType.ToString().ToLower();
 
-                var clone = repository.links.clone.First(r => r.name == "https");
+                var clone = repository.links.clone.First(r => r.name == scmAuthenticationType);
                 var cloneUrl = clone.href;
 
                 var repo = new HosterRepository(repository.full_name, repository.slug, cloneUrl, type); 
