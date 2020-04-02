@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -239,6 +239,12 @@
   </data>
   <data name="NoSourceConfigured" xml:space="preserve">
     <value>No source configured!</value>
+  </data>
+  <data name="OAuthKeyAndSecretEmpty" xml:space="preserve">
+    <value>ConsumerKey and ConsumerSecret are empty. Without authentication, SCM Backup will backup public repositories only!</value>
+  </data>
+  <data name="OAuthKeyOrSecretEmpty" xml:space="preserve">
+    <value>Only one of ConsumerKey/ConsumerSecret is filled. Make sure you fill both or none!</value>
   </data>
   <data name="ReadingConfig" xml:space="preserve">
     <value>{0}: Reading config</value>

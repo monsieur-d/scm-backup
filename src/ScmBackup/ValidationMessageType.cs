@@ -11,6 +11,8 @@
         NameEmpty,
         AuthNameOrPasswortEmpty,
         AuthNameAndPasswortEmpty,
+        OAuthKeyOrSecretEmpty,
+        OAuthKeyAndSecretEmpty,
         AuthNameAndNameNotEqual,
 
         /// <summary>

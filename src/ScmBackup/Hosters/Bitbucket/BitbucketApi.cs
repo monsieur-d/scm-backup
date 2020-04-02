@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 using ScmBackup.Http;
 using System;
 using System.Collections.Generic;
@@ -6,16 +6,18 @@ using System.Linq;
 using System.Net;
 using System.Security;
 using System.Security.Authentication;
+using SharpBucket.V2;
+using SharpBucket.V2.Pocos;
 
 namespace ScmBackup.Hosters.Bitbucket
 {
     internal class BitbucketApi : IHosterApi
     {
-        private readonly IHttpRequest request;
+        private readonly SharpBucketV2 sharpBucket = new SharpBucketV2();
 
         public BitbucketApi(IHttpRequest request)
         {
-            this.request = request;
+
         }
 
         public List<HosterRepository> GetRepositoryList(ConfigSource source)
@@ -23,57 +25,32 @@ namespace ScmBackup.Hosters.Bitbucket
             var list = new List<HosterRepository>();
             string className = this.GetType().Name;
 
-            request.SetBaseUrl("https://api.bitbucket.org");
-
             if (source.IsAuthenticated)
             {
-                request.AddBasicAuthHeader(source.AuthName, source.Password);
-            }
-
-            string url = string.Empty;
-            string apiUsername = null;
-
-            // Issue #32: from Apr 29 2019, usernames (not team names) must be replaced by UUIDs
-            if (source.Type.ToLower() == "user")
+                if(source.ApiAuthenticationType == ApiAuthenticationTypeEnum.OAuth)
+                    sharpBucket.OAuth2ClientCredentials(source.OAuthConsumerKey, source.OAuthConsumerSecret);
+                else
             {
-                url = "/2.0/users/" + source.Name;
-
-                var result = request.Execute(url).Result;
-
-                if (result.IsSuccessStatusCode)
-                {
-                    var apiResponse = JsonConvert.DeserializeObject<BitbucketApiUserResponse>(result.Content);
-                    if (apiResponse != null)
-                    {
-                        apiUsername = Uri.EscapeUriString(apiResponse.uuid);
+                    sharpBucket.BasicAuthentication(source.AuthName, source.Password);
                     }
                 }
 
-                if (string.IsNullOrWhiteSpace(apiUsername))
+            List<Repository> repositories;
+            if (source.Type.ToLower() == "user")
                 {
-                    throw new InvalidOperationException(string.Format(Resource.ApiBitbucketCantGetUuid, source.Name));
+                var userEndpoint = sharpBucket.UsersEndPoint(source.Name);
+                repositories = userEndpoint.ListRepositories();
                 }
-            }
             else
             {
-                apiUsername = source.Name;
+                var teamResource = sharpBucket.TeamsEndPoint().TeamResource(source.Name);
+                repositories = teamResource.ListRepositories();
             }
 
-
-            url = "/2.0/repositories/" + apiUsername;
-
-            while (url != null)
+            foreach (var repository in repositories)
             {
-                var result = request.Execute(url).Result;
-
-                if (result.IsSuccessStatusCode)
-                {
-                    var apiResponse = JsonConvert.DeserializeObject<BitbucketApiResponse>(result.Content);
-
-                    foreach (var apiRepo in apiResponse.values)
-                    {
                         ScmType type;
-                        switch (apiRepo.scm.ToLower())
+                switch (repository.scm.ToLower())
                         {
                             case "hg":
                                 type = ScmType.Mercurial;
@@ -82,19 +59,21 @@ namespace ScmBackup.Hosters.Bitbucket
                                 type = ScmType.Git;
                                 break;
                             default:
-                                throw new InvalidOperationException(string.Format(Resource.ApiInvalidScmType, apiRepo.full_name));
+                        throw new InvalidOperationException(string.Format(Resource.ApiInvalidScmType, repository.full_name));
                         }
 
-                        var clone = apiRepo.links.clone.Where(r => r.name == "https").First();
-                        string cloneurl = clone.href;
+                var scmAuthenticationType = source.ScmAuthenticationType.ToString().ToLower();
 
-                        var repo = new HosterRepository(apiRepo.full_name, apiRepo.slug, cloneurl, type);
+                var clone = repository.links.clone.First(r => r.name == "https");
+                var cloneUrl = clone.href;
 
-                        repo.SetPrivate(apiRepo.is_private);
+                var repo = new HosterRepository(repository.full_name, repository.slug, cloneUrl, type); 
 
-                        if (apiRepo.has_wiki)
+                repo.SetPrivate(repository.is_private ?? false);
+
+                if (repository.has_wiki ?? false)
                         {
-                            string wikiUrl = cloneurl + "/wiki";
+                    string wikiUrl = cloneUrl + "/wiki";
                             repo.SetWiki(true, wikiUrl.ToString());
                         }
 
@@ -102,22 +81,6 @@ namespace ScmBackup.Hosters.Bitbucket
 
                         list.Add(repo);
                     }
-
-                    url = apiResponse.next;
-                }
-                else
-                {
-                    switch (result.Status)
-                    {
-                        case HttpStatusCode.Unauthorized:
-                            throw new AuthenticationException(string.Format(Resource.ApiAuthenticationFailed, source.AuthName));
-                        case HttpStatusCode.Forbidden:
-                            throw new SecurityException(Resource.ApiMissingPermissions);
-                        case HttpStatusCode.NotFound:
-                            throw new InvalidOperationException(string.Format(Resource.ApiInvalidUsername, source.Name));
-                    }
-                }
-            }
 
             return list;
         }

@@ -16,7 +16,11 @@ waitSecondsOnError: 5
 
 sources:
 
-  - title:  github_singleuser
-    hoster: github
+  - title:  bitbucket_test
+    hoster: bitbucket
     type: user
-    name: scm-backup-testuser
+    name: testuser
+    apiAuthenticationType: OAuth
+    oAuthConsumerKey: 123456QWERTzrtz
+    oAuthConsumerSecret: secret
+

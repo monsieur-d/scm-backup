@@ -1,4 +1,4 @@
-﻿namespace ScmBackup.Hosters
+namespace ScmBackup.Hosters
 {
     /// <summary>
     /// base class for all config source validators
@@ -37,23 +37,46 @@
                 result.AddMessage(ErrorLevel.Error, Resource.NameEmpty, ValidationMessageType.NameEmpty);
             }
 
-            bool authNameEmpty = string.IsNullOrWhiteSpace(source.AuthName);
-            bool passwordEmpty = string.IsNullOrWhiteSpace(source.Password);
+            if (source.ApiAuthenticationType == ApiAuthenticationTypeEnum.OAuth)
+            {
+                var consumerKeyEmpty = string.IsNullOrWhiteSpace(source.OAuthConsumerKey);
+                var consumerSecretEmpty = string.IsNullOrWhiteSpace(source.OAuthConsumerSecret);
+                if (consumerKeyEmpty ^ consumerSecretEmpty)
+                {
+                    result.AddMessage(ErrorLevel.Error, Resource.OAuthKeyOrSecretEmpty,
+                        ValidationMessageType.OAuthKeyOrSecretEmpty);
+                }
+                else if (consumerKeyEmpty)
+                {
+                    result.AddMessage(ErrorLevel.Warn, Resource.OAuthKeyAndSecretEmpty,
+                        ValidationMessageType.OAuthKeyAndSecretEmpty);
+                }
 
-            if (authNameEmpty != passwordEmpty)
-            {
-                result.AddMessage(ErrorLevel.Error, Resource.AuthNameOrPasswortEmpty, ValidationMessageType.AuthNameOrPasswortEmpty);
             }
-            else if (authNameEmpty && passwordEmpty)
+            if (source.ApiAuthenticationType == ApiAuthenticationTypeEnum.BasicAuth)
             {
-                result.AddMessage(ErrorLevel.Warn, Resource.AuthNameAndPasswortEmpty, ValidationMessageType.AuthNameAndPasswortEmpty);
+                var authNameEmpty = string.IsNullOrWhiteSpace(source.AuthName);
+                var passwordEmpty = string.IsNullOrWhiteSpace(source.Password);
+
+                if (authNameEmpty ^ passwordEmpty)
+            {
+                    result.AddMessage(ErrorLevel.Error, Resource.AuthNameOrPasswortEmpty,
+                        ValidationMessageType.AuthNameOrPasswortEmpty);
+            }
+                else if (authNameEmpty)
+            {
+                    result.AddMessage(ErrorLevel.Warn, Resource.AuthNameAndPasswortEmpty,
+                        ValidationMessageType.AuthNameAndPasswortEmpty);
             }
 
             if (this.AuthNameAndNameMustBeEqual)
             {
                 if (source.Type != "org" && source.Name != source.AuthName)
                 {
-                    result.AddMessage(ErrorLevel.Warn, string.Format(Resource.AuthNameAndNameNotEqual, source.Hoster), ValidationMessageType.AuthNameAndNameNotEqual);
+                        result.AddMessage(ErrorLevel.Warn,
+                            string.Format(Resource.AuthNameAndNameNotEqual, source.Hoster),
+                            ValidationMessageType.AuthNameAndNameNotEqual);
+                    }
                 }
             }
 

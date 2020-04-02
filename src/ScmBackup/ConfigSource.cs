@@ -1,8 +1,14 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace ScmBackup
 {
+    internal enum ApiAuthenticationTypeEnum
+    {
+        BasicAuth,
+        OAuth
+    }
+
     /// <summary>
     /// Configuration data to get the repositories of user X from hoster Y
     /// (subclass for Config)
@@ -24,6 +30,8 @@ namespace ScmBackup
         /// </summary>
         public string Type { get; set; }
 
+        public ApiAuthenticationTypeEnum? ApiAuthenticationType { get; set; }
+
         /// <summary>
         /// user name
         /// </summary>
@@ -36,20 +44,42 @@ namespace ScmBackup
         public string AuthName { get; set; }
 
         /// <summary>
+        /// password for authentication
+        /// </summary>
+        public string Password { get; set; }
+
+        /// <summary>
+        /// consumer key for OAuth authentication
+        /// </summary>
+        public string OAuthConsumerKey { get; set; }
+
+        /// <summary>
+        /// consumer secret for OAuth authentication
+        /// </summary>
+        public string OAuthConsumerSecret { get; set; }
+
+
+        /// <summary>
         /// list of repository names which should be ignored
         /// </summary>
         public List<string> IgnoreRepos { get; set; }
 
-        /// <summary>
-        /// password for authentication
-        /// </summary>
-        public string Password { get; set; }
+
 
         public bool IsAuthenticated
         {
             get
             {
-                return !String.IsNullOrWhiteSpace(this.AuthName) && !String.IsNullOrWhiteSpace(this.Password);
+                return ApiAuthenticationType switch
+                {
+                    var x when x == ApiAuthenticationTypeEnum.BasicAuth || !x.HasValue 
+                        => !string.IsNullOrWhiteSpace(AuthName) 
+                           && !string.IsNullOrWhiteSpace(Password),
+                    ApiAuthenticationTypeEnum.OAuth 
+                        => !string.IsNullOrWhiteSpace(OAuthConsumerKey) 
+                           && !string.IsNullOrWhiteSpace(OAuthConsumerSecret),
+                    _ => throw new ArgumentOutOfRangeException()
+                };
             }
         }
 
