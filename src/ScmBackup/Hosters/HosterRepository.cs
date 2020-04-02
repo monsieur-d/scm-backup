@@ -1,19 +1,22 @@
-﻿namespace ScmBackup.Hosters
+﻿using System;
+
+namespace ScmBackup.Hosters
 {
     /// <summary>
     /// Data to access one single repository
     /// </summary>
     internal class HosterRepository
     {
-        public HosterRepository(string fullName, string shortName, string cloneUrl, ScmType scm)
+        public HosterRepository(string fullName, string shortName, string cloneUrl, ScmType scm, DateTime? lastUpdated = null)
         {
             SetFullName(fullName);
             this.ShortName = shortName;
             this.CloneUrl = cloneUrl;
             this.Scm = scm;
+            LastUpdated = lastUpdated ?? DateTime.MinValue;
         }
 
-        public HosterRepository(string fullName, string shortName, string cloneUrl, ScmType scm, bool haswiki, string wikiurl, bool hasissues, string issueurl)
+        public HosterRepository(string fullName, string shortName, string cloneUrl, ScmType scm, bool haswiki, string wikiurl, bool hasissues, string issueurl, DateTime? lastUpdated = null)
         {
             SetFullName(fullName);
             this.ShortName = shortName;
@@ -21,6 +24,7 @@
             this.Scm = scm;
             SetWiki(haswiki, wikiurl);
             SetIssues(hasissues, issueurl);
+            LastUpdated = lastUpdated ?? DateTime.MinValue;
         }
 
         /// <summary>
@@ -67,6 +71,8 @@
         /// the repo is private
         /// </summary>
         public bool IsPrivate { get; private set; }
+
+        public DateTime LastUpdated { get; private set; }
 
         public void SetFullName(string name)
         {

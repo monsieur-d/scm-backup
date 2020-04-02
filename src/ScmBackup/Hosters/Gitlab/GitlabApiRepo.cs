@@ -1,4 +1,4 @@
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -15,5 +15,6 @@ namespace ScmBackup.Hosters.Gitlab
         public string visibility { get; set; }
         public bool issues_enabled { get; set; }
         public bool wiki_enabled { get; set; }
+        public DateTime last_activity_at { get; set; }
     }
 }
