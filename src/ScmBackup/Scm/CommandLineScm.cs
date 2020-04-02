@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -16,6 +16,9 @@ namespace ScmBackup.Scm
         protected IContext Context { get; set; }
 
         public IFileSystemHelper FileSystemHelper { get; set; }
+
+        protected ConfigScm ScmConfig { get; set; }
+
         /// <summary>
         /// The command that needs to be called
         /// </summary>
@@ -25,6 +28,12 @@ namespace ScmBackup.Scm
         {
             FileSystemHelper = fileSystemHelper;
             Context = context;
+
+            var config = Context?.Config;
+            if (config?.Scms != null)
+            {
+                ScmConfig = config.Scms.FirstOrDefault(s => string.Equals(s.Name, ShortName, StringComparison.CurrentCultureIgnoreCase));
+            }
         }
 
         /// <summary>
@@ -140,12 +149,12 @@ namespace ScmBackup.Scm
             if (configValue == null || string.IsNullOrEmpty(configValue.Path)) 
                 return;
 
-                    if (!File.Exists(configValue.Path))
-                    {
-                        throw new FileNotFoundException(string.Format(Resource.ScmNotOnThisComputer + ": {1}", this.DisplayName, configValue.Path));
-                    }
-
-                    this.executable = configValue.Path;
-                }
+            if (!File.Exists(configValue.Path))
+            {
+                throw new FileNotFoundException(string.Format(Resource.ScmNotOnThisComputer + ": {1}", this.DisplayName, configValue.Path));
             }
+
+            this.executable = configValue.Path;
         }
+    }
+}
