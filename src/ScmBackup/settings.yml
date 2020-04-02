@@ -1,4 +1,4 @@
-﻿# all backups go here
+# all backups go here
 localFolder: 'c:\scm-backup'
 
 # when an error occurs, wait that many seconds before exiting the application
@@ -21,6 +21,5 @@ sources:
     type: user
     name: testuser
     apiAuthenticationType: OAuth
-    oAuthConsumerKey: 123456QWERTzrtz
-    oAuthConsumerSecret: secret
+    scmAuthenticationType: ssh
 
