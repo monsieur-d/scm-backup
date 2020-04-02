@@ -6,8 +6,6 @@ namespace ScmBackup.Scm
     [Scm(Type = ScmType.Git)]
     internal class GitScm : CommandLineScm, IScm
     {
-
-
         public GitScm(IFileSystemHelper fileSystemHelper, IContext context) : base(fileSystemHelper, context)
         { }
 
@@ -25,6 +23,8 @@ namespace ScmBackup.Scm
         {
             get { return "git"; }
         }
+
+        private bool LfsFetch => ScmConfig?.LfsFetch ?? false;
 
         public override bool IsOnThisComputer()
         {
@@ -54,7 +54,7 @@ namespace ScmBackup.Scm
         public override bool DirectoryIsRepository(string directory)
         {
             // SCM Backup uses bare repos only, so we don't need to check for non-bare repos at all
-            string cmd = string.Format("-C \"{0}\" rev-parse --is-bare-repository", directory);
+            string cmd = $"-C \"{directory}\" rev-parse --is-bare-repository";
             var result = this.ExecuteCommand(cmd);
 
             if (result.Successful && result.StandardOutput.ToLower().StartsWith("true"))
@@ -69,7 +69,7 @@ namespace ScmBackup.Scm
         {
             if (!this.DirectoryIsRepository(directory))
             {
-                string cmd = string.Format("init --bare \"{0}\"", directory);
+                string cmd = $"init --bare \"{directory}\"";
                 var result = this.ExecuteCommand(cmd);
 
                 if (!result.Successful)
@@ -109,13 +109,26 @@ namespace ScmBackup.Scm
                 remoteUrl = this.CreateRepoUrlWithCredentials(remoteUrl, credentials);
             }
             
-            string cmd = string.Format("-C \"{0}\" fetch --force --prune {1} refs/heads/*:refs/heads/* refs/tags/*:refs/tags/*", directory, remoteUrl);
+            string cmd = $"-C \"{directory}\" fetch --force --prune {remoteUrl} refs/heads/*:refs/heads/* refs/tags/*:refs/tags/*";
             var result = this.ExecuteCommand(cmd);
 
             if (!result.Successful)
             {
                 throw new InvalidOperationException(result.Output);
             }
+
+            if (LfsFetch)
+            {
+                string pullLfsCmd = $"-C \"{directory}\" lfs fetch --all {remoteUrl}";
+                var resultPullLfs = this.ExecuteCommand(pullLfsCmd);
+
+                if (!resultPullLfs.Successful)
+                {
+                    throw new InvalidOperationException(resultPullLfs.Output);
+                }
+            }
+
+
         }
 
         public override bool RepositoryContainsCommit(string directory, string commitid)
@@ -131,7 +144,7 @@ namespace ScmBackup.Scm
             }
 
             // https://stackoverflow.com/a/21878920/6884
-            string cmd = string.Format("-C \"{0}\" rev-parse --quiet --verify {1}^{{commit}}", directory, commitid);
+            string cmd = $"-C \"{directory}\" rev-parse --quiet --verify {commitid}^{{commit}}";
             var result = this.ExecuteCommand(cmd);
 
             if (result.Successful && result.Output.StartsWith(commitid))

@@ -11,5 +11,10 @@
         /// Path to executable
         /// </summary>
         public string Path { get; set; }
+
+        /// <summary>
+        /// indicates if all files should be pulled from lfs
+        /// </summary>
+        public bool LfsFetch { get; set; }
     }
 }
