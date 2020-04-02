@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -13,12 +13,19 @@ namespace ScmBackup.Scm
 
         public abstract string DisplayName { get; }
 
-        protected IContext context { get; set; }
+        protected IContext Context { get; set; }
 
+        public IFileSystemHelper FileSystemHelper { get; set; }
         /// <summary>
         /// The command that needs to be called
         /// </summary>
         protected abstract string CommandName { get; }
+
+        public CommandLineScm(IFileSystemHelper fileSystemHelper, IContext context)
+        {
+            FileSystemHelper = fileSystemHelper;
+            Context = context;
+        }
 
         /// <summary>
         /// Check whether the SCM exists on this computer
@@ -43,17 +50,20 @@ namespace ScmBackup.Scm
                 this.GetExecutable();
             }
 
-            var info = new ProcessStartInfo();
-            info.FileName = this.executable;
-            info.Arguments = args;
-            info.CreateNoWindow = true;
-            info.RedirectStandardError = true;
-            info.RedirectStandardOutput = true;
+            var info = new ProcessStartInfo
+            {
+                FileName = this.executable,
+                Arguments = args,
+                CreateNoWindow = true,
+                RedirectStandardError = true,
+                RedirectStandardOutput = true
+            };
 
             var proc = Process.Start(info);
-            var result = new CommandLineResult();
-            result.StandardError = proc.StandardError.ReadToEnd();
-            result.StandardOutput = proc.StandardOutput.ReadToEnd();
+            var result = new CommandLineResult
+            {
+                StandardError = proc.StandardError.ReadToEnd(), StandardOutput = proc.StandardOutput.ReadToEnd()
+            };
             proc.WaitForExit();
 
             result.ExitCode = proc.ExitCode;
@@ -77,7 +87,7 @@ namespace ScmBackup.Scm
         /// </summary>
         public bool RemoteRepositoryExists(string remoteUrl)
         {
-            return this.RemoteRepositoryExists(remoteUrl, null);
+            return RemoteRepositoryExists(remoteUrl, null);
         }
 
         /// <summary>
@@ -92,7 +102,7 @@ namespace ScmBackup.Scm
         /// </summary>
         public void PullFromRemote(string remoteUrl, string directory)
         {
-            this.PullFromRemote(remoteUrl, directory, null);
+            PullFromRemote(remoteUrl, directory, null);
         }
 
         /// <summary>
@@ -118,17 +128,18 @@ namespace ScmBackup.Scm
 
             // check if there's an path in the "Scms" section in the config
             // (if it's there, the file MUST exist!)
-            if (this.context == null)
+            if (Context == null)
             {
                 throw new InvalidOperationException(Resource.CommandLineScm_ContextIsNull);
             }
 
-            var config = this.context.Config;
-            if (config.Scms != null)
-            {
-                var configValue = config.Scms.FirstOrDefault(s => s.Name.ToLower() == this.ShortName.ToLower());
-                if (configValue != null)
-                {
+            var config = Context.Config;
+            var configValue = config.Scms?
+                .FirstOrDefault(s => string.Equals(s.Name, this.ShortName, StringComparison.CurrentCultureIgnoreCase));
+                
+            if (configValue == null || string.IsNullOrEmpty(configValue.Path)) 
+                return;
+
                     if (!File.Exists(configValue.Path))
                     {
                         throw new FileNotFoundException(string.Format(Resource.ScmNotOnThisComputer + ": {1}", this.DisplayName, configValue.Path));
@@ -138,5 +149,3 @@ namespace ScmBackup.Scm
                 }
             }
         }
-    }
-}

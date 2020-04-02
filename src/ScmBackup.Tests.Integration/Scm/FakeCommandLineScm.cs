@@ -7,7 +7,7 @@ namespace ScmBackup.Tests.Integration.Scm
 {
     internal class FakeCommandLineScm : CommandLineScm, IScm
     {
-        public FakeCommandLineScm()
+        public FakeCommandLineScm() : base(null, new FakeContext())
         {
             string testAssemblyDir = DirectoryHelper.TestAssemblyDirectory();
 
@@ -29,8 +29,12 @@ namespace ScmBackup.Tests.Integration.Scm
             {
                 throw new NotImplementedException();
             }
+        }
 
-            this.context = new FakeContext();
+        public IContext ContextAccess
+        {
+            get => Context;
+            set => Context = value;
         }
 
         /// <summary>
@@ -52,12 +56,6 @@ namespace ScmBackup.Tests.Integration.Scm
         /// "wrong" command which doesn't exist (to test error handling)
         /// </summary>
         public string FakeCommandNameNotExisting { get; private set; }
-
-        public IContext Context
-        {
-            get { return this.context; }
-            set { this.context = value; }
-        }
 
         public override string DisplayName
         {

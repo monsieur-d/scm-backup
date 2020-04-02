@@ -8,14 +8,11 @@ namespace ScmBackup.Scm
     [Scm(Type = ScmType.Mercurial)]
     internal class MercurialScm : CommandLineScm, IScm
     {
-        public MercurialScm(IFileSystemHelper filesystemhelper, IContext context, IUrlHelper urlhelper)
+        public MercurialScm(IFileSystemHelper fileSystemHelper, IContext context, IUrlHelper urlhelper) : base(fileSystemHelper, context)
         {
-            this.FileSystemHelper = filesystemhelper;
-            this.context = context;
             this.UrlHelper = urlhelper;
         }
 
-        public IFileSystemHelper FileSystemHelper { get; set; }
         public IUrlHelper UrlHelper { get; set; }
 
         public override string ShortName
