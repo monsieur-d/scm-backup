@@ -14,6 +14,11 @@ waitSecondsOnError: 5
 #  userName: testuser
 #  password: not-the-real-password
 
+backupTargetFolder: 'c:\scm-backup-target'
+numberOfBackupsToRetain: 20
+numberOfLongTermBackupsToRetain: 5
+maxTotalBackupsSize: 10Gib
+
 sources:
 
   - title:  bitbucket_test
