@@ -21,7 +21,7 @@ namespace ScmBackup
             this.configBackupMaker = configBackupMaker;
         }
 
-        public void Run()
+        public bool Run()
         {
             this.configBackupMaker.BackupConfigs();
 
@@ -31,11 +31,14 @@ namespace ScmBackup
             {
                 throw new InvalidOperationException(Resource.ScmValidatorError);
             }
-            
+
+            var retVal = false;
             foreach (var source in repos.GetSources())
             {
-                this.backupMaker.Backup(source, repos.GetReposForSource(source));
+                retVal |= backupMaker.Backup(source, repos.GetReposForSource(source));
             }
+
+            return retVal;
         }
     }
 }

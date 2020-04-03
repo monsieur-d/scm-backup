@@ -29,7 +29,7 @@ namespace ScmBackup
             this.context = context;
         }
 
-        public void Backup(ConfigSource source, IEnumerable<HosterRepository> repos)
+        public bool Backup(ConfigSource source, IEnumerable<HosterRepository> repos)
         {
             var isLongTermBackup = context.Config.IsLongTermBackup;
 
@@ -71,7 +71,7 @@ namespace ScmBackup
             if (!reposToZip.Any())
             {
                 logger.Log(ErrorLevel.Info, Resource.NothingHasChanged, source.Title);
-                return;
+                return false;
             }
 
             var destinationPath = Path.Combine(context.Config.BackupTargetFolder,
@@ -92,6 +92,8 @@ namespace ScmBackup
             zipFile.Save(destinationPath);
 
             CleanUpBackups();
+
+            return true;
         }
 
         private void CleanUpBackups()

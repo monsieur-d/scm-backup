@@ -6,12 +6,14 @@ namespace ScmBackup.Tests
     {
         public Exception ToThrow { get; set; }
 
-        public void Run()
+        public bool Run()
         {
             if (this.ToThrow != null)
             {
                 throw this.ToThrow;
             }
+
+            return true;
         }
     }
 }

@@ -5,6 +5,6 @@ namespace ScmBackup
 {
     internal interface IBackupMaker
     {
-        void Backup(ConfigSource source, IEnumerable<HosterRepository> repos);
+        bool Backup(ConfigSource source, IEnumerable<HosterRepository> repos);
     }
 }

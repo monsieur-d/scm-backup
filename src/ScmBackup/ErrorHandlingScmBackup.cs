@@ -27,23 +27,23 @@ namespace ScmBackup
             this.WaitSecondsOnError = 5;
         }
 
-        public void Run()
+        public bool Run()
         {
-            bool ok = false;
+            bool backupCompleted = false;
             string className = this.GetType().Name;
 
             try
             {
                 this.logger.Log(ErrorLevel.Debug, Resource.StartingBackup, className);
                 this.backup.Run();
-                ok = true;
+                backupCompleted = true;
             }
             catch (Exception ex)
             {
                 this.logger.Log(ErrorLevel.Error, ex.Message);
             }
 
-            if (!ok)
+            if (!backupCompleted)
             {
                 // Wait as many seconds as defined in the config.
                 // If we don't have the config value because the exception was thrown while reading the config, use the default value defined in this class
@@ -59,6 +59,8 @@ namespace ScmBackup
                 Task.Delay(TimeSpan.FromSeconds(seconds)).Wait();
                 Environment.ExitCode = 1;
             }
+
+            return backupCompleted;
         }
     }
 }
