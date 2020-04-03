@@ -57,6 +57,7 @@ namespace ScmBackup
                 this.logger.Log(ErrorLevel.Error, Resource.BackupFailed);
                 this.logger.Log(ErrorLevel.Error, Resource.EndSeconds, seconds);
                 Task.Delay(TimeSpan.FromSeconds(seconds)).Wait();
+                Environment.ExitCode = 1;
             }
         }
     }
