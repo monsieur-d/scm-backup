@@ -35,16 +35,16 @@ namespace ScmBackup.Hosters.Bitbucket
                 }
             }
 
-            List<Repository> repositories;
+            IEnumerable<Repository> repositories;
             if (source.Type.ToLower() == "user")
             {
                 var userEndpoint = sharpBucket.UsersEndPoint(source.Name);
-                repositories = userEndpoint.ListRepositories();
+                repositories = userEndpoint.RepositoriesResource.EnumerateRepositories();
             }
             else
             {
                 var teamResource = sharpBucket.TeamsEndPoint().TeamResource(source.Name);
-                repositories = teamResource.ListRepositories();
+                repositories = teamResource.RepositoriesResource.ListRepositories();
             }
             
             foreach (var repository in repositories)
