@@ -71,6 +71,15 @@ namespace ScmBackup
         /// </summary>
         public List<string> IgnoreRepos { get; set; }
 
+        /// <summary>
+        /// Wiki backup can be disabled with that setting. Default is true
+        /// </summary>
+        public bool BackupWikis { get; set; } = true;
+
+        /// <summary>
+        /// Issues backup can be disabled with that setting. Default is true
+        /// </summary>
+        public bool BackupIssues { get; set; } = true;
 
 
         public bool IsAuthenticated

@@ -34,13 +34,13 @@ namespace ScmBackup.Hosters
             string subdir = Path.Combine(repoFolder, this.SubDirRepo);
             this.BackupRepo(subdir, credentials);
 
-            if (this.repo.HasWiki)
+            if (this.repo.HasWiki && source.BackupWikis)
             {
                 subdir = Path.Combine(repoFolder, this.SubDirWiki);
                 this.BackupWiki(subdir, credentials);
             }
 
-            if (this.repo.HasIssues)
+            if (this.repo.HasIssues && source.BackupIssues)
             {
                 subdir = Path.Combine(repoFolder, this.SubDirIssues);
                 this.BackupIssues(subdir, credentials);
