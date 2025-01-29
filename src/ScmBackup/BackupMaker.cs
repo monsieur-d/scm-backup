@@ -46,26 +46,33 @@ namespace ScmBackup
 
             foreach (var repo in repos)
             {
-                string repoFolderPath = this.fileHelper.CreateSubDirectory(sourceFolder, repo.FullName);
+                try
+                {
+                    string repoFolderPath = this.fileHelper.CreateSubDirectory(sourceFolder, repo.FullName);
 
-                var lastUpdateFilePath = Path.Combine(repoFolderPath, "lastUpdated");
+                    var lastUpdateFilePath = Path.Combine(repoFolderPath, "lastUpdated");
 
-                if (!isLongTermBackup && File.Exists(lastUpdateFilePath) &&
-                    DateTime.TryParse(File.ReadAllText(lastUpdateFilePath), out var lastUpdated) &&
-                    repo.LastUpdated <= lastUpdated) 
-                    continue;
+                    if (!isLongTermBackup && File.Exists(lastUpdateFilePath) &&
+                        DateTime.TryParse(File.ReadAllText(lastUpdateFilePath), out var lastUpdated) &&
+                        repo.LastUpdated <= lastUpdated)
+                        continue;
 
-                var logUrl = repo.CloneUrl;
-                if (source.ScmAuthenticationType == ScmAuthenticationType.Https)
-                    logUrl = url.RemoveCredentialsFromUrl(logUrl);
+                    var logUrl = repo.CloneUrl;
+                    if (source.ScmAuthenticationType == ScmAuthenticationType.Https)
+                        logUrl = url.RemoveCredentialsFromUrl(logUrl);
 
-                this.logger.Log(ErrorLevel.Info, Resource.BackupMaker_Repo, repo.Scm.ToString(), logUrl);
+                    this.logger.Log(ErrorLevel.Info, Resource.BackupMaker_Repo, repo.Scm.ToString(), logUrl);
 
-                this.backupMaker.MakeBackup(source, repo, repoFolderPath);
+                    this.backupMaker.MakeBackup(source, repo, repoFolderPath);
 
-                File.WriteAllText(lastUpdateFilePath, repo.LastUpdated.ToString("o"));
+                    File.WriteAllText(lastUpdateFilePath, repo.LastUpdated.ToString("o"));
 
-                reposToZip.Add(repoFolderPath);
+                    reposToZip.Add(repoFolderPath);
+                }
+                catch (Exception ex)
+                {
+                    logger.Log(ErrorLevel.Error, logMessage + $"repository {repo.FullName} failed with exception.", ex);
+                }
             }
 
             if (!reposToZip.Any())
